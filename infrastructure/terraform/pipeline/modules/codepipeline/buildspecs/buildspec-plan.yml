@@ -1,0 +1,37 @@
+version: 0.2
+# This buildspec runs the terraform plan
+# Gets the source zip and the output artifacts from the build stage
+env:
+  variables:
+    TF_INPUT: false
+phases:
+  install:
+    commands:
+      - $CODEBUILD_SRC_DIR/infrastructure/scripts/install_terraform.sh
+      - export BUILD_ARTIFACT=$(eval echo \$CODEBUILD_SRC_DIR_$BUILD_ARTIFACT)
+      - echo $BUILD_ARTIFACT
+      - export ARTIFACTS_DIR="/tmp/$DEPLOY_PROJECT_NAME/build"
+  pre_build:
+    commands:
+      - echo "Running plan stage"
+      - ls
+      - echo "Getting build artifact..."
+      - ls $BUILD_ARTIFACT
+      - mkdir -p $ARTIFACTS_DIR && cd $ARTIFACTS_DIR
+      - cp -r $BUILD_ARTIFACT/* .
+      - ls
+      - cd $CODEBUILD_SRC_DIR
+  build:
+    commands:
+      - set -eu
+      - cd infrastructure/terraform/project
+      - echo "Recreating backend-config file..."
+      - echo $DEPLOY_PROJECT_BACKEND_CONFIG_CONTENT_B64 | base64 -d - > $DEPLOY_PROJECT_BACKEND_CONFIG_FILE
+      - echo $DEPLOY_PROJECT_VARIABLES_CONTENT_B64 | base64 -d - > $DEPLOY_PROJECT_VARIABLES_FILE
+      - terraform init -reconfigure -backend-config="$DEPLOY_PROJECT_BACKEND_CONFIG_FILE"
+      - terraform plan -out=tfplan -var-file="$DEPLOY_PROJECT_VARIABLES_FILE"
+      - echo "Plan done"
+artifacts:
+  files:
+    - tfplan
+  base-directory: infrastructure/terraform/project

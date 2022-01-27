@@ -1,0 +1,44 @@
+openapi: "3.0.1"
+info:
+  title: "${title}"
+  version: "1.0.0"
+  description: "${description}"
+x-amazon-apigateway-api-key-source : "HEADER"
+paths:
+  /webhook:
+    post:
+      operationId: "webhookPost"
+      responses:
+        200:
+          description: "Webhook Post"
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: "string"
+            Access-Control-Allow-Credentials:
+              schema:
+                type: "string"
+            Access-Control-Allow-Headers:
+              schema:
+                type: "string"
+          content:
+            text/plain:
+              schema:
+                type: string
+      x-amazon-apigateway-integration:
+        uri: "arn:aws:apigateway:${region}:lambda:path/2015-03-31/functions/${lambda_arn}/invocations"
+        httpMethod: "POST"
+        type: "aws_proxy"
+x-amazon-apigateway-gateway-responses:
+  DEFAULT_4XX:
+    responseParameters:
+      gatewayresponse.header.Access-Control-Allow-Credentials: "'true'"
+      gatewayresponse.header.Access-Control-Allow-Origin: "method.request.header.origin"
+    responseTemplates:
+      application/json: '{"message":$context.error.messageString}'
+  DEFAULT_5XX:
+    responseParameters:
+      gatewayresponse.header.Access-Control-Allow-Credentials: "'true'"
+      gatewayresponse.header.Access-Control-Allow-Origin: "method.request.header.origin"
+    responseTemplates:
+      application/json: '{"message":$context.error.messageString}'

@@ -1,0 +1,171 @@
+openapi: "3.0.1"
+info:
+  title: "${title}"
+  version: "1.0.0"
+  description: "${description}"
+x-amazon-apigateway-api-key-source : "HEADER"
+paths:
+  /test:
+    post:
+      operationId: "postTest"
+      responses:
+        200:
+          description: "Post example"
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: "string"
+            Access-Control-Allow-Credentials:
+              schema:
+                type: "string"
+            Access-Control-Allow-Headers:
+              schema:
+                type: "string"
+          content:
+            text/plain:
+              schema:
+                type: string
+      security:
+        - api_key: ["${api_key}"]
+      x-amazon-apigateway-integration:
+        uri: "arn:aws:apigateway:${region}:lambda:path/2015-03-31/functions/${lambda_arn}/invocations"
+        httpMethod: "POST"
+        type: "aws_proxy"
+    get:
+      operationId: "getTest"
+      responses:
+        200:
+          description: "Get example"
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: "string"
+            Access-Control-Allow-Credentials:
+              schema:
+                type: "string"
+            Access-Control-Allow-Headers:
+              schema:
+                type: "string"
+          content:
+            text/plain:
+              schema:
+                type: string
+      security:
+        - api_key: ["${api_key}"]
+      x-amazon-apigateway-integration:
+        uri: "arn:aws:apigateway:${region}:lambda:path/2015-03-31/functions/${lambda_arn}/invocations"
+        httpMethod: "POST"
+        type: "aws_proxy"
+    options:
+      responses:
+        200:
+          description: "200 response"
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: "string"
+            Access-Control-Allow-Methods:
+              schema:
+                type: "string"
+            Access-Control-Allow-Credentials:
+              schema:
+                type: "string"
+            Access-Control-Allow-Headers:
+              schema:
+                type: "string"
+      security:
+        - api_key: ["${api_key}"]
+      x-amazon-apigateway-integration:
+        uri: "arn:aws:apigateway:${region}:lambda:path/2015-03-31/functions/${lambda_arn}/invocations"
+        httpMethod: "POST"
+        type: "aws_proxy"
+        responses:
+          default:
+            statusCode: "200"
+        requestTemplates:
+          application/json: "{statusCode:200}"
+        contentHandling: "CONVERT_TO_TEXT"
+  /test/{id}:
+    parameters:
+      - $ref: "#/components/parameters/id"
+    get:
+      operationId: "getTestById"
+      responses:
+        200:
+          description: "Get example by Id"
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: "string"
+            Access-Control-Allow-Credentials:
+              schema:
+                type: "string"
+            Access-Control-Allow-Headers:
+              schema:
+                type: "string"
+          content:
+            text/plain:
+              schema:
+                type: string
+      security:
+        - api_key: ["${api_key}"]
+      x-amazon-apigateway-integration:
+        uri: "arn:aws:apigateway:${region}:lambda:path/2015-03-31/functions/${lambda_arn}/invocations"
+        httpMethod: "POST"
+        type: "aws_proxy"
+    options:
+      responses:
+        200:
+          description: "200 response"
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: "string"
+            Access-Control-Allow-Methods:
+              schema:
+                type: "string"
+            Access-Control-Allow-Credentials:
+              schema:
+                type: "string"
+            Access-Control-Allow-Headers:
+              schema:
+                type: "string"
+      security:
+        - api_key: ["${api_key}"]
+      x-amazon-apigateway-integration:
+        uri: "arn:aws:apigateway:${region}:lambda:path/2015-03-31/functions/${lambda_arn}/invocations"
+        httpMethod: "POST"
+        type: "aws_proxy"
+        responses:
+          default:
+            statusCode: "200"
+        requestTemplates:
+          application/json: "{statusCode:200}"
+        contentHandling: "CONVERT_TO_TEXT"
+components:
+  securitySchemes:
+    api_key:
+      type: "apiKey"
+      name: "x-api-key"
+      in: "header"
+  parameters:
+    id:
+      in: "path"
+      name: "id"
+      schema:
+        type: "string"
+      required: true
+      description: "ID of the record to get"
+x-amazon-apigateway-gateway-responses:
+  DEFAULT_4XX:
+    responseParameters:
+      gatewayresponse.header.Access-Control-Allow-Credentials: "'true'"
+      gatewayresponse.header.Access-Control-Allow-Origin: "method.request.header.origin"
+    responseTemplates:
+      application/json: '{"message":$context.error.messageString}'
+  DEFAULT_5XX:
+    responseParameters:
+      gatewayresponse.header.Access-Control-Allow-Credentials: "'true'"
+      gatewayresponse.header.Access-Control-Allow-Origin: "method.request.header.origin"
+    responseTemplates:
+      application/json: '{"message":$context.error.messageString}'

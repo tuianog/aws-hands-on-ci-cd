@@ -1,0 +1,38 @@
+version: 0.2
+# This buildspec runs the terraform apply
+# Gets the source zip and the output artifacts from the build and plan stages
+env:
+  variables:
+    TF_INPUT: false
+phases:
+  install:
+    commands:
+      - $CODEBUILD_SRC_DIR/infrastructure/scripts/install_terraform.sh
+      - export BUILD_ARTIFACT=$(eval echo \$CODEBUILD_SRC_DIR_$BUILD_ARTIFACT)
+      - export PLAN_ARTIFACT=$(eval echo \$CODEBUILD_SRC_DIR_$PLAN_ARTIFACT)
+      - echo $BUILD_ARTIFACT
+      - echo $PLAN_ARTIFACT
+      - export ARTIFACTS_DIR="/tmp/$DEPLOY_PROJECT_NAME/build"
+  pre_build:
+    commands:
+      - echo "Running apply stage"
+      - ls
+      - echo "Getting build artifact..."
+      - ls $BUILD_ARTIFACT
+      - mkdir -p $ARTIFACTS_DIR && cd $ARTIFACTS_DIR
+      - cp -r $BUILD_ARTIFACT/* .
+      - ls
+      - echo "Getting plan artifact..."
+      - cd $CODEBUILD_SRC_DIR
+      - cd infrastructure/terraform/project
+      - ls $PLAN_ARTIFACT
+      - cp -r $PLAN_ARTIFACT/* .
+      - ls
+  build:
+    commands:
+      - set -eu
+      - echo "Recreating backend-config file..."
+      - echo $DEPLOY_PROJECT_BACKEND_CONFIG_CONTENT_B64 | base64 -d - > $DEPLOY_PROJECT_BACKEND_CONFIG_FILE
+      - terraform init -reconfigure -backend-config="$DEPLOY_PROJECT_BACKEND_CONFIG_FILE"
+      - terraform apply -auto-approve tfplan
+      - echo "Apply done"

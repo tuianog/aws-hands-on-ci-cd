@@ -1,0 +1,17 @@
+version: 0.2
+# This buildspec builds the backend lambda source zip and the layer dependencies zip
+# Gets the source zip from the input artifacts
+# The dependencies zip file needs to include folder python
+phases:
+  pre_build:
+    commands:
+      - echo "Running build stage"
+      - lambda/package.sh
+  build:
+    commands:
+      - echo "Build done"
+artifacts:
+  files:
+    - deployment.zip
+    - dependencies.zip
+  base-directory: /tmp/$DEPLOY_PROJECT_NAME/build/
